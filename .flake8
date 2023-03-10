@@ -1,0 +1,14 @@
+# sadly this has to be specified extra,
+# as flake8 doesn't implement the pyproject.toml standard for configuration
+[flake8]
+max-line-length = 89
+exclude =
+    .git
+    __pycache__
+    tests/*
+    conftest.py
+max-complexity = 20
+per-file-ignores = __init__.py:F401,F403
+ignore = D100,E203,W503
+min_python_version = 3.7.0
+docstring-convention=numpy

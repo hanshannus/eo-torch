@@ -1,0 +1,31 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+      - id: check-yaml
+      - id: debug-statements
+      - id: end-of-file-fixer
+        exclude: ^(.+\.ipynb)
+        exclude_types: [html, csv, jupyter]
+      - id: trailing-whitespace
+        exclude_types: [html, markdown]
+  - repo: local
+    hooks:
+    -   id: black-formatting
+        name: Apply black formatting
+        language: system
+        pass_filenames: true
+        entry: black
+        files: \.py
+    -   id: generate-requirements-file
+        name: Generate requirements file
+        entry: poetry export -f requirements.txt --output requirements.txt --without-hashes
+        language: system
+        types: [python]
+        pass_filenames: false
+    -   id: generate-requirements-dev-file
+        name: Generate requirements file for dev
+        entry: poetry export -f requirements.txt --output requirements_dev.txt --without-hashes --dev
+        language: system
+        types: [python]
+        pass_filenames: false
