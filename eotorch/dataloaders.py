@@ -14,7 +14,6 @@ def init_torch_dataloader(dataset, sampler=None, **kwargs):
 
 
 class DataLoader:
-
     def __init__(self, dataset=None, sampler=None, **kwargs):
         self.dataset = dataset
         self.sampler = sampler

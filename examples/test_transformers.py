@@ -10,8 +10,13 @@ from torchmetrics import Accuracy, JaccardIndex
 from pytorch_lightning import Trainer
 from pathlib import Path
 
-from transformers.models.maskformer import MaskFormerImageProcessor, MaskFormerForInstanceSegmentation, MaskFormerConfig
-from transformers.models.maskformer.modeling_maskformer import MaskFormerForInstanceSegmentationOutput
+from transformers.models.maskformer import (
+    MaskFormerForInstanceSegmentation,
+    MaskFormerConfig,
+)
+from transformers.models.maskformer.modeling_maskformer import (
+    MaskFormerForInstanceSegmentationOutput,
+)
 from transformers.models.swin import SwinConfig
 from transformers.models.detr import DetrConfig
 
@@ -166,4 +171,3 @@ trainer.fit(
     train_dataloaders=train_dataloader,
     val_dataloaders=val_dataloader,
 )
-

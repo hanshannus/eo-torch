@@ -29,11 +29,11 @@ class TaskLoss(nn.Module):
 
 class TaskMetrics:
     def __init__(
-            self,
-            metrics: Union[MetricCollection, Metric, Sequence[Metric], Dict[str, Metric]],
-            val_metrics: nn.Module = None,
-            test_metrics: nn.Module = None,
-            train_metrics: nn.Module = None,
+        self,
+        metrics: Union[MetricCollection, Metric, Sequence[Metric], Dict[str, Metric]],
+        val_metrics: nn.Module = None,
+        test_metrics: nn.Module = None,
+        train_metrics: nn.Module = None,
     ):
         super().__init__()
         if metrics is None and train_metrics is None:
@@ -89,10 +89,10 @@ class TaskMetrics:
 
 class TaskPlotter:
     def __init__(
-            self,
-            train_plotter: nn.Module = None,
-            val_plotter: nn.Module = None,
-            test_plotter: nn.Module = None,
+        self,
+        train_plotter: nn.Module = None,
+        val_plotter: nn.Module = None,
+        test_plotter: nn.Module = None,
     ):
         super().__init__()
         self.train_plotter = train_plotter
@@ -115,14 +115,14 @@ class TaskPlotter:
 
 class TaskTrainer(pl.LightningModule):
     def __init__(
-            self,
-            model: nn.Module,
-            loss: TaskLoss,
-            metrics: TaskMetrics,
-            optimizer_config,
-            plotter: TaskPlotter = None,
-            preprocessing: Callable[[Tensor], Any] = None,
-            postprocessing: Callable[[Any], Tensor] = None,
+        self,
+        model: nn.Module,
+        loss: TaskLoss,
+        metrics: TaskMetrics,
+        optimizer_config,
+        plotter: TaskPlotter = None,
+        preprocessing: Callable[[Tensor], Any] = None,
+        postprocessing: Callable[[Any], Tensor] = None,
     ) -> None:
         super().__init__()
 
@@ -135,10 +135,10 @@ class TaskTrainer(pl.LightningModule):
         self._optimizer_config = optimizer_config
 
     def forward(
-            self,
-            x: Tensor,
-            *args: Any,
-            **kwargs: Any,
+        self,
+        x: Tensor,
+        *args: Any,
+        **kwargs: Any,
     ) -> Tensor:
         if self.preprocessing is not None:
             x = self.preprocessing(x)
@@ -148,11 +148,11 @@ class TaskTrainer(pl.LightningModule):
         return y_hat
 
     def step(
-            self,
-            batch: Dict[str, Tensor],
-            status: str,
-            *args: Any,
-            **kwargs: Any,
+        self,
+        batch: Dict[str, Tensor],
+        status: str,
+        *args: Any,
+        **kwargs: Any,
     ) -> Tensor:
         x, y = batch["image"], batch["mask"]
         y_hat = self.forward(x, *args, **kwargs)

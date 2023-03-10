@@ -24,7 +24,18 @@ import shapely.geometry
 import shapely.ops
 from rtree.index import Index, Property
 from .utils import BoundingBox, concat_samples, merge_samples, disambiguate_timestamp
-from typing import overload, Any, Callable, Dict, List, Optional, Sequence, Tuple, cast, Union
+from typing import (
+    overload,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    cast,
+    Union,
+)
 
 
 def raw_path(path):
@@ -522,19 +533,18 @@ class RasterDataset(Dataset):
     cmap: Dict[int, Tuple[int, int, int, int]] = {}
 
     def __init__(
-            self,
-            root: Union[str, Path],
-            crs: Optional[CRS] = None,
-            res: Optional[float] = None,
-            transforms: Optional[
-                Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
-            cache: bool = True,
-            bands: Union[Tuple[int, ...], List[int]] = None,
-            filename_glob: str = "*.tif",
-            filename_regex: str = r".*_(?P<date>\d{8})\.tif",
-            date_format: str = "%Y%m%d",
-            is_image: bool = True,
-            dtype=torch.float,
+        self,
+        root: Union[str, Path],
+        crs: Optional[CRS] = None,
+        res: Optional[float] = None,
+        transforms: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
+        cache: bool = True,
+        bands: Union[Tuple[int, ...], List[int]] = None,
+        filename_glob: str = "*.tif",
+        filename_regex: str = r".*_(?P<date>\d{8})\.tif",
+        date_format: str = "%Y%m%d",
+        is_image: bool = True,
+        dtype=torch.float,
     ) -> None:
         """Initialize a new Dataset instance.
 
@@ -640,8 +650,7 @@ class RasterDataset(Dataset):
 
         return sample
 
-    def _merge_files(self, filepaths: Sequence[str],
-                     query: BoundingBox) -> Tensor:
+    def _merge_files(self, filepaths: Sequence[str], query: BoundingBox) -> Tensor:
         """Load and merge one or more files.
 
         Args:
@@ -713,18 +722,18 @@ class JSONDataset(Dataset):
     """Abstract base class for :class:`Dataset` stored as GeoJSON files."""
 
     def __init__(
-            self,
-            root: Union[str, Path, Sequence[str], Sequence[Path]] = "data",
-            crs: CRS = None,
-            res: Tuple[float, float] = (0.0001, 0.0001),
-            transforms: Callable[[Dict[str, Any]], Dict[str, Any]] = None,
-            exdata: List[int] = None,
-            indata: List[int] = None,
-            filename_glob: str = "*.geojson",
-            filename_regex: str = r".*_(?P<date>\d{8})\.geojson",
-            date_format: str = "%Y%m%d",
-            label_column: str = None,
-            dtype=torch.long,
+        self,
+        root: Union[str, Path, Sequence[str], Sequence[Path]] = "data",
+        crs: CRS = None,
+        res: Tuple[float, float] = (0.0001, 0.0001),
+        transforms: Callable[[Dict[str, Any]], Dict[str, Any]] = None,
+        exdata: List[int] = None,
+        indata: List[int] = None,
+        filename_glob: str = "*.geojson",
+        filename_regex: str = r".*_(?P<date>\d{8})\.geojson",
+        date_format: str = "%Y%m%d",
+        label_column: str = None,
+        dtype=torch.long,
     ) -> None:
         """AI is creating summary for __init__
 
@@ -820,11 +829,13 @@ class JSONDataset(Dataset):
             gdf = gpd.read_file(filepath)
             # Get list of geometries for all features in vector file
             if self.label_column not in gdf.columns:
-                msg = (f"Label column '{self.label_column}' not found in "
-                       "DataFrame. A valid label column must be provided, where "
-                       "the row entries are one integer with a value between 0 "
-                       "and 255. These integers represent the class and are "
-                       "used to create a raster mask for training.")
+                msg = (
+                    f"Label column '{self.label_column}' not found in "
+                    "DataFrame. A valid label column must be provided where "
+                    "the row entries are one integer with a value between 0 "
+                    "and 255. These integers represent the class and are "
+                    "used to create a raster mask for training."
+                )
                 raise InvalidColumnName(msg)
             for geom, label in zip(gdf.geometry, gdf[self.label_column]):
                 if self.exdata is not None and label in self.exdata:
@@ -872,7 +883,6 @@ class JSONDataset(Dataset):
 
 
 class TaskDataset(Dataset):
-
     @overload
     def __init__(self, *args, transforms=None):
         ...
@@ -886,12 +896,12 @@ class TaskDataset(Dataset):
         ...
 
     def __init__(
-            self,
-            *args,
-            dataset=None,
-            image_dataset=None,
-            label_dataset=None,
-            transforms=None,
+        self,
+        *args,
+        dataset=None,
+        image_dataset=None,
+        label_dataset=None,
+        transforms=None,
     ):
         super().__init__()
         # combine image and label data
@@ -918,8 +928,8 @@ class TaskDataset(Dataset):
         self.res: Tuple[float, float] = self.dataset.res
 
     def __getitem__(
-            self,
-            query: BoundingBox,
+        self,
+        query: BoundingBox,
     ) -> Dict[str, Any]:
         batch = self.dataset[query]
         # transform

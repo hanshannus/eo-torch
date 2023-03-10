@@ -7,10 +7,8 @@ import torch
 from torch.nn import BCEWithLogitsLoss
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchmetrics import Accuracy, JaccardIndex
-from torchmetrics.classification import BinaryAccuracy, BinaryJaccardIndex
 from pytorch_lightning import Trainer
 from pathlib import Path
-import numpy
 
 import segmentation_models_pytorch as smp
 
@@ -141,4 +139,3 @@ trainer.fit(
     train_dataloaders=train_dataloader,
     val_dataloaders=val_dataloader,
 )
-

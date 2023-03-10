@@ -18,14 +18,14 @@ class Sampler(TorchSampler[List[BoundingBox]], abc.ABC):
     """
 
     def __init__(
-            self,
-            size: Union[float, Tuple[float, float]] = None,
-            stride: Union[Tuple[float, float], float] = None,
-            length: int = None,
-            batch_size: int = None,
-            dataset: Optional[Dataset] = None,
-            data_source: Optional[Sized] = None,
-            roi: Optional[BoundingBox] = None
+        self,
+        size: Union[float, Tuple[float, float]] = None,
+        stride: Union[Tuple[float, float], float] = None,
+        length: int = None,
+        batch_size: int = None,
+        dataset: Optional[Dataset] = None,
+        data_source: Optional[Sized] = None,
+        roi: Optional[BoundingBox] = None,
     ) -> None:
         """Initialize a new Sampler instance.
 
@@ -90,8 +90,8 @@ class Sampler(TorchSampler[List[BoundingBox]], abc.ABC):
         for hit in self.index.intersection(tuple(self.roi), objects=True):
             bounds = BoundingBox(*hit.bounds)
             if (
-                    bounds.maxx - bounds.minx > self.size[1]
-                    and bounds.maxy - bounds.miny > self.size[0]
+                bounds.maxx - bounds.minx > self.size[1]
+                and bounds.maxy - bounds.miny > self.size[0]
             ):
                 self.hits.append(hit)
 
@@ -100,12 +100,14 @@ class Sampler(TorchSampler[List[BoundingBox]], abc.ABC):
             for hit in self.hits:
                 bounds = BoundingBox(*hit.bounds)
 
-                rows = int(
-                    (bounds.maxy - bounds.miny - self.size[0]) // self.stride[0]
-                ) + 1
-                cols = int(
-                    (bounds.maxx - bounds.minx - self.size[1]) // self.stride[1]
-                ) + 1
+                rows = (
+                    int((bounds.maxy - bounds.miny - self.size[0]) // self.stride[0])
+                    + 1
+                )
+                cols = (
+                    int((bounds.maxx - bounds.minx - self.size[1]) // self.stride[1])
+                    + 1
+                )
                 length += rows * cols
             self.length = length
 
@@ -150,8 +152,9 @@ class RandomBatchSampler(Sampler):
             roi: region of interest to sample from (minx, maxx, miny, maxy, mint, maxt)
                 (defaults to the bounds of ``dataset.index``)
         """
-        super().__init__(dataset=dataset, size=size, batch_size=batch_size,
-                         length=length, roi=roi)
+        super().__init__(
+            dataset=dataset, size=size, batch_size=batch_size, length=length, roi=roi
+        )
 
     def __iter__(self) -> Iterator[List[BoundingBox]]:
         """Return the indices of a dataset.
@@ -301,18 +304,14 @@ class FullGridSampler(Sampler):
         for hit in self.hits:
             bounds = BoundingBox(*hit.bounds)
 
-            ny = int(
-                (bounds.maxy - bounds.miny - self.size[0]) // self.stride[0] + 1
-            )
+            ny = int((bounds.maxy - bounds.miny - self.size[0]) // self.stride[0] + 1)
             steps_y = np.linspace(
                 bounds.miny,
                 bounds.maxy - self.size[0],
                 ny + 1,
             )
 
-            nx = int(
-                (bounds.maxx - bounds.minx - self.size[1]) // self.stride[1] + 1
-            )
+            nx = int((bounds.maxx - bounds.minx - self.size[1]) // self.stride[1] + 1)
             steps_x = np.linspace(
                 bounds.minx,
                 bounds.maxx - self.size[1],
