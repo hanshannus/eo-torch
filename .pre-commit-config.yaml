@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v4.4.0
     hooks:
       - id: check-yaml
       - id: debug-statements
@@ -25,7 +25,7 @@ repos:
         pass_filenames: false
     -   id: generate-requirements-dev-file
         name: Generate requirements file for dev
-        entry: poetry export -f requirements.txt --output requirements_dev.txt --without-hashes --dev
+        entry: poetry export -f requirements.txt --output requirements_dev.txt --without-hashes --with dev
         language: system
         types: [python]
         pass_filenames: false
