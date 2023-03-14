@@ -644,9 +644,7 @@ class RasterDataset(Dataset):
                 i += 1
 
         if i == 0:
-            raise FileNotFoundError(
-                f"No {self.__class__.__name__} data was found in '{root}'"
-            )
+            warnings.warn(f"No data was found in '{root}'")
 
         return index
 
@@ -852,9 +850,7 @@ class JSONDataset(Dataset):
                 i += 1
 
         if i == 0:
-            raise FileNotFoundError(
-                f"No {self.__class__.__name__} data was found in '{root}'"
-            )
+            warnings.warn(f"No data was found in '{root}'")
 
         return index
 
