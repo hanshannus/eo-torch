@@ -534,9 +534,9 @@ class RasterDataset(Dataset):
 
     def __init__(
         self,
-        root: Union[str, Path],
+        root: Union[str, Path] = None,
         crs: Optional[CRS] = None,
-        res: Optional[float] = None,
+        res: Optional[Tuple[float, float]] = None,
         transforms: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
         cache: bool = True,
         bands: Union[Tuple[int, ...], List[int]] = None,
@@ -563,11 +563,49 @@ class RasterDataset(Dataset):
         """
         super().__init__(transforms)
 
+        self._crs = crs
+        self.res = res
         self.cache = cache
         self.bands = bands
         self.is_image = is_image
         self.dtype = dtype
+        self._root = root
+        self.filename_glob = filename_glob
+        self.filename_regex = filename_regex
+        self.date_format = date_format
 
+        self.index = self.populate_index(
+            self._root,
+            self.filename_glob,
+            self.filename_regex,
+            self.date_format,
+        )
+
+    @property
+    def root(self):
+        return self._root
+
+    @root.setter
+    def root(self, value):
+        self._root = value
+        self.index = self.populate_index(
+            self._root,
+            self.filename_glob,
+            self.filename_regex,
+            self.date_format,
+        )
+
+    def populate_index(
+        self,
+        root: Union[str, Path],
+        filename_glob: str = "*.tif",
+        filename_regex: str = r".*_(?P<date>\d{8})\.tif",
+        date_format: str = "%Y%m%d",
+    ) -> Index:
+        # Create an R-tree to index the dataset
+        index = Index(interleaved=False, properties=Property(dimension=3))
+        if root is None:
+            return index
         # Populate the dataset index
         i = 0
         filename_regex = re.compile(filename_regex, re.VERBOSE)
@@ -580,13 +618,12 @@ class RasterDataset(Dataset):
                             self.cmap = src.colormap(1)
                         except ValueError:
                             pass
+                    if self._crs is None:
+                        self._crs = src.crs
+                    if self.res is None:
+                        self.res = src.res
 
-                    if crs is None:
-                        crs = src.crs
-                    if res is None:
-                        res = src.res
-
-                    with WarpedVRT(src, crs=crs) as vrt:
+                    with WarpedVRT(src, crs=self._crs) as vrt:
                         minx, miny, maxx, maxy = vrt.bounds
             except rasterio.errors.RasterioIOError:
                 # Skip files that rasterio is unable to read
@@ -600,7 +637,7 @@ class RasterDataset(Dataset):
                     mint, maxt = disambiguate_timestamp(date, date_format)
 
                 coords = (minx, maxx, miny, maxy, mint, maxt)
-                self.index.insert(i, coords, str(filepath))
+                index.insert(i, coords, str(filepath))
                 i += 1
 
         if i == 0:
@@ -608,9 +645,7 @@ class RasterDataset(Dataset):
                 f"No {self.__class__.__name__} data was found in '{root}'"
             )
 
-        self._crs = cast(CRS, crs)
-        # self.resolution = cast(float, resolution)
-        self.res: Tuple[float, float] = res
+        return index
 
     def __getitem__(self, query: BoundingBox) -> Dict[str, Any]:
         """Retrieve image/mask and metadata indexed by query.
@@ -756,12 +791,35 @@ class JSONDataset(Dataset):
         """
         super().__init__(transforms)
 
+        self._crs = crs
         self.res: Tuple[float, float] = res
         self.exdata = exdata
         self.indata = indata
         self.label_column = label_column
         self.dtype = dtype
+        self._root = root
+        self.filename_glob = filename_glob
+        self.filename_regex = filename_regex
+        self.date_format = date_format
 
+        self.index = self.populate_index(
+            self._root,
+            self.filename_glob,
+            self.filename_regex,
+            self.date_format,
+        )
+
+    def populate_index(
+        self,
+        root: Union[str, Path, Sequence[str], Sequence[Path]] = "data",
+        filename_glob: str = "*.geojson",
+        filename_regex: str = r".*_(?P<date>\d{8})\.geojson",
+        date_format: str = "%Y%m%d",
+    ) -> Index:
+        # Create an R-tree to index the dataset
+        index = Index(interleaved=False, properties=Property(dimension=3))
+        if root is None:
+            return index
         # Populate the dataset index
         i = 0
         filename_regex = re.compile(filename_regex, re.VERBOSE)
@@ -769,9 +827,9 @@ class JSONDataset(Dataset):
             try:
                 # Read in vector
                 gdf = gpd.read_file(filepath)
-                if crs is None:
-                    crs = gdf.crs
-                gdf = gdf.set_crs(crs, allow_override=True)
+                if self._crs is None:
+                    self._crs = gdf.crs
+                gdf = gdf.set_crs(self._crs, allow_override=True)
             except Exception as e:
                 print(e)
                 # Skip files that rasterio is unable to read
@@ -787,7 +845,7 @@ class JSONDataset(Dataset):
 
                 minx, miny, maxx, maxy = gdf.total_bounds
                 coords = (minx, maxx, miny, maxy, mint, maxt)
-                self.index.insert(i, coords, filepath)
+                index.insert(i, coords, filepath)
                 i += 1
 
         if i == 0:
@@ -795,7 +853,21 @@ class JSONDataset(Dataset):
                 f"No {self.__class__.__name__} data was found in '{root}'"
             )
 
-        self._crs = crs
+        return index
+
+    @property
+    def root(self):
+        return self._root
+
+    @root.setter
+    def root(self, value):
+        self._root = value
+        self.index = self.populate_index(
+            self._root,
+            self.filename_glob,
+            self.filename_regex,
+            self.date_format,
+        )
 
     def __getitem__(self, query: BoundingBox) -> Dict[str, Any]:
         """Retrieve image/mask and metadata indexed by query.

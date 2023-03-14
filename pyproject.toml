@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "eotorch"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Johannes Hecher"]
 readme = "README.md"
 description = "Machine learning training classes for raster image segmentation"
