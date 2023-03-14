@@ -17,7 +17,7 @@ from pathlib import Path
 import geopandas as gpd
 import numpy as np
 from pandas.errors import InvalidColumnName
-
+import warnings
 import pyproj
 import shapely
 import shapely.geometry
@@ -58,7 +58,10 @@ def _get_file_generator(root, filename_glob):
     if isinstance(root, (str, Path)):
         root = raw_path(root)
         root = Path(root)
-        if root.is_dir():
+        if not root.exists():
+            warnings.warn(f"root {root} does not exist")
+            yield from ()
+        elif root.is_dir():
             yield from root.rglob(filename_glob)
         elif root.is_file():
             yield root
